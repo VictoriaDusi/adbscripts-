@@ -1,0 +1,35 @@
+
+---> adbcameraimage.robot
+*** Settings ***
+Library     Process
+Library     OperatingSystem
+Library     String
+Library     BuiltIn
+
+*** Variables ***
+${ADB}     adb
+${CAMERA_DIR}    /sdcard/DCIM/Camera/
+
+*** Test Cases ***
+Check Image Capture via Camera App
+    Log To Console    \n--- Capturing file list before image capture ---
+    ${before}=        Run Process    ${ADB}    shell    ls ${CAMERA_DIR}    shell=True    stdout=PIPE
+    ${before_output}=     Decode Bytes To String    ${before.stdout}
+    ${before_files}=      Split To Lines    ${before_output}
+    Log To Console    Files Before:\n${before_files}
+
+    Log To Console    \n--- Prompting user to open Camera App and capture an image manually ---
+    Sleep    15s    # Wait time to let user open the app and take a picture
+
+    Log To Console    \n--- Capturing file list after image capture ---
+    ${after}=         Run Process    ${ADB}    shell    ls ${CAMERA_DIR}    shell=True    stdout=PIPE
+    ${after_output}=  Decode Bytes To String    ${after.stdout}
+    ${after_files}=   Split To Lines    ${after_output}
+    Log To Console    Files After:\n${after_files}
+
+    ${new_files}=     Evaluate    [x for x in ${after_files} if x not in ${before_files}]
+    Log To Console    New Image Files:\n${new_files}
+
+    Run Keyword If    ${new_files}    Log To Console    \n Image captured successfully: ${new_files}
+    Run Keyword Unless    ${new_files}    Fail         No new image file detected. Camera might not be working.
+

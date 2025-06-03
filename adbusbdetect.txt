@@ -1,0 +1,42 @@
+--> adbusbdetect
+
+*** Settings ***
+Library   Process
+Library   OperatingSystem
+Library   String
+Library   Collections
+Library   BuiltIn
+
+*** Variables ***
+${ADB}   adb
+
+*** Test cases ***
+Detect new usb device after insertion
+        Log To Console   \n---------Capturing lsusb device before inserting USB
+        ${before.stdout}        OperatingSystem.Run             ${ADB} shell lsusb
+        Log To Console       ${before.stdout}
+        ${before_lines}=      Split To Lines            ${before.stdout}
+        Log To Console       \nUSB Devices Before:\n${before_lines}
+
+       Sleep     10s
+
+       Log To Console  \n-----------Capturing lsusb device after inserting USB
+       ${after.stdout}          OperatingSystem.Run              ${ADB} shell lsusb
+       Log To Console           ${after.stdout}
+       ${after_lines}=          Split To Lines          ${after.stdout}
+       Log To Console          \nUSB Devices after:\n${after_lines}
+
+
+      ${new_devices}=   Create List
+      FOR    ${Line}   IN    @{after_lines}
+          IF  $Line not in ${before_lines}
+              Append To List     ${new_devices}     ${Line}
+          END
+      END
+
+
+      IF   ${new_devices}
+           Log To Console       New USB device detected:@{new_devices}
+      ELSE
+        FAIL       No new USB  device detected!
+      END
