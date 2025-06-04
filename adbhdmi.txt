@@ -1,0 +1,20 @@
+--> adbHDMI 
+
+*** Settings ***
+Library   OperatingSystem
+
+
+*** Variables ***
+${ADB}  adb
+
+
+*** Test Cases ***
+Detect HDMI connection on Rockchip
+       Log To Console    \n checking HDMI connection status on board
+
+       ${result.stdout}     OperatingSystem.Run   ${ADB} shell cat /sys/class/drm/card0-HDMI-A-1/status
+       Log To Console        ${result.stdout}
+
+       Run Keyword if     '${result.stdout}' == 'connected'      Log To Console   HDMI is Connected
+       Run keyword if     '${result.stdout}' == 'disconnected'   Fail    HDMI is not connected please connect the cable to monitor
+                                                                                                                                                                                                                    ~                                                                                                                                    ~                                                                                                                                    ~                           
