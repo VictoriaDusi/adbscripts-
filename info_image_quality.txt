@@ -1,0 +1,64 @@
+Sharpness (Laplacian Variance):
+
+lap_var = cv2.Laplacian(img, cv2.CV_64F).var()
+What it measures: Edge clarity. High sharpness means edges in the image are well-defined.
+
+How it works: The Laplacian filter highlights edges. The variance of the result tells us how much edge detail there is.
+
+Typical Ranges:
+
+0–50: Very blurry
+
+50–100: Slightly blurry
+
+100–500: Acceptable to sharp
+
+500+: Very sharp (may be noisy too)
+
+Threshold: Often set at 100 to differentiate blurry from sharp.
+
+2. Brightness (Mean Pixel Intensity)
+
+brightness = np.mean(img)
+What it measures: Average grayscale intensity of the image.
+
+Range: 0 (completely black) to 255 (completely white)
+
+Typical Ranges:
+
+0–50: Very dark
+
+50–100: Low brightness
+
+100–180: Normal
+
+180–255: Very bright
+
+Threshold for "good" brightness: ~100 to 180
+
+
+3. Contrast (Standard Deviation of Intensity)
+
+contrast = np.std(img)
+What it measures: The spread between dark and light areas. High contrast means strong difference between light/dark.
+
+Range: 0 (all pixels same value) to ~127 (maximum spread)
+
+Typical Ranges:
+
+0–20: Very low contrast (flat image)
+
+20–50: Moderate contrast
+
+50–100+: High contrast (punchy image)	
+
+
+
+Implementing  Image Quality Analysis:
+Sharpness: Use algorithms like the variance of the Laplacian to assess image sharpness.
+
+Brightness: Calculate the mean pixel intensity to evaluate brightness levels.
+
+Contrast: Determine the standard deviation of pixel intensities to measure contrast.
+
+Threshold: Often, 30–60 is a healthy range for general contrast.
