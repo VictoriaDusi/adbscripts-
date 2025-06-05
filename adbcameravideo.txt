@@ -1,0 +1,48 @@
+---> adbcameravideo.robot
+
+
+***Settings***
+Library           OperatingSystem
+Library           Collections
+Library           BuiltIn
+Library           String
+
+*** Variables ***
+${ADB}            adb
+
+*** Test Cases ***
+Detect the image while clicking the app
+    # Step 1: Get the list before opening the Camera app
+    ${before_result.stdout}        OperatingSystem.Run    ${ADB} shell ls /sdcard/DCIM/Camera
+    Log To Console             \n:${before_result.stdout}
+    ${default_file_list}=      Split To Lines         ${before_result.stdout}
+    Log To Console             Camera images before:\n${default_file_list}
+
+    # Step 2: Ask user to manually capture an video
+    Log To Console             \n------------- Prompting user to Open the Camera app and capture an image manually
+    Sleep                      20s
+
+    # Step 3: Get  list after capturing
+    ${after_result.stdout}           OperatingSystem.Run    ${ADB} shell ls /sdcard/DCIM/Camera
+    Log To Console             \n:${after_result.stdout}
+    ${updated_file_list}=      Split To Lines         ${after_result.stdout}
+    Log To Console             Camera images after:\n${updated_file_list}
+
+   # Step 4: Filter only .mp4 images
+    ${filtered_list}=          Create List
+    FOR    ${line}    IN    @{updated_file_list}
+        Run Keyword If          "${line}".endswith(".mp4")     Append To List    ${filtered_list}    ${line}
+    END
+    Log To Console             \nFiltered .mp4 images:\n${filtered_list}
+
+    # Step 5: Detect newly captured images
+    ${new_files}=              Create List
+    FOR    ${file}    IN    @{filtered_list}
+        Run Keyword Unless    '${file}' in ${default_file_list}    Append To List    ${new_files}    ${file}
+    END
+
+    # Step 6: Log and validate
+    Log To Console             \nNew video(s) captured:\n${new_files}
+    Should Not Be Empty        ${new_files}    No new video was captured. Camera video may not be working.
+
+                                   
