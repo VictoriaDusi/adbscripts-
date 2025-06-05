@@ -1,0 +1,52 @@
+---> cameraimage_quality.robot 
+
+*** Settings ***
+Library           OperatingSystem
+Library           ImageSharpnessLibrary.py
+Library           BuiltIn
+
+*** Variables ***
+${IMAGE_PATH}     systemcameraimg.jpg
+${THRESHOLD}      100
+
+# Brightness thresholds
+${BRIGHTNESS_VERY_DARK_MAX}    50
+${BRIGHTNESS_LOW_MAX}          100
+${BRIGHTNESS_NORMAL_MAX}       180
+
+# Contrast thresholds
+${CONTRAST_VERY_LOW_MAX}       20
+${CONTRAST_MODERATE_MAX}       50
+
+
+
+***Test cases ***
+Validate Sharpness of Image
+    ${sharpness}    Check Image Sharpness    ${IMAGE_PATH}
+    Log To Console   \nImage Sharpness Value: ${sharpness}
+    Should Be True   ${sharpness} > ${THRESHOLD}    Image is too blurry!
+    Log To Console    Image is sharp!
+
+
+Validate brightness of Image
+    ${brightness}   Check Brightness      ${IMAGE_PATH}
+    Log To Console    \nImage Brightness Value: ${brightness}
+    Run Keyword If    ${brightness} < ${BRIGHTNESS_VERY_DARK_MAX}    Fail    Image is very dark
+    Run Keyword If    ${brightness} >= ${BRIGHTNESS_VERY_DARK_MAX} and ${brightness} < ${BRIGHTNESS_LOW_MAX}    Log To Console    Image has low brightness
+    Run Keyword If    ${brightness} >= ${BRIGHTNESS_LOW_MAX} and ${brightness} <= ${BRIGHTNESS_NORMAL_MAX}    Log To Console    Image brightness is normal
+    Run Keyword If    ${brightness} > ${BRIGHTNESS_NORMAL_MAX}    Log To Console    Image is very bright
+
+
+
+
+Valiadate contrast of Image
+    ${contrast}     Check Contrast        ${IMAGE_PATH}
+    Log To Console      \nImage contrast Value: ${contrast}
+    Run Keyword If    ${contrast} < ${CONTRAST_VERY_LOW_MAX}    Fail    Image has very low contrast
+    Run Keyword If    ${contrast} >= ${CONTRAST_VERY_LOW_MAX} and ${contrast} < ${CONTRAST_MODERATE_MAX}    Log To Console    Image has moderate contrast
+    Run Keyword If    ${contrast} >= ${CONTRAST_MODERATE_MAX}    Log To Console    Image has high contrast
+
+
+#checking the video format
+ #   ${format}      operatingSystem.Run         ffprobe -show_entries format=format_name -v quiet -of csv=p=0 ${IMAGE_PATH}
+  #  Log To Console     Detected Video Format:${format}
