@@ -1,0 +1,33 @@
+--> checkformat camera specification in video
+
+*** Settings ***
+Library   OperatingSystem
+Library   Process
+
+
+*** Variables ***
+${Video_Path}      VID_20220614_101211.mp4
+
+*** Test cases ***
+checking the video format
+    ${format}       OperatingSystem.Run         ffprobe -show_entries format=tags=major_brand ${Video_Path}
+    Log To Console      Detected Video Format:${format}
+
+checking the duration of video
+    ${Duration}     OperatingSystem.Run         ffprobe -show_entries format=duration -v quiet -of csv="p=0" ${Video_Path}
+    Log To Console      Detected Video Duration:${Duration}
+
+checking the resolutions of video
+    ${Resolution}    OperatingSystem.Run        ffprobe -show_entries stream=width,height ${Video_Path}
+    Log To Console     Detected Video resolution:${Resolution}
+
+checking the framerate
+    ${Framerate}     OperatingSystem.Run        ffprobe -v error -select_streams v:0 -show_entries stream=avg_frame_rate -of default=noprint_wrappers=1:nokey=1 ${Video_Path}
+    Log To Console      Detected Video FrameRate:${FrameRate}
+
+Check Audio Stream In Video
+    ${result}     OperatingSystem.Run    ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 ${Video_Path}
+    ${audio_index}=    Set Variable    ${result.strip()}
+    Log To Console     ${audio_index}${audio_index}
+    Run Keyword If    '${audio_index}' != ''    Log To Console    Audio stream is present.
+    Run Keyword Unless    '${audio_index}' != ''    Fail    No audio stream detected in the video.
